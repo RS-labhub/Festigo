@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id                 String               @id @default(uuid())
+  eventName          String
+  startDateTime      DateTime
+  endDateTime        DateTime
+  hostId             String
+  venueId            String
+  budget             Budget?
+  channelparticipant ChannelParticipant[]
+  chats              Chat[]
+  host               Users                @relation(fields: [hostId], references: [username])
+  venue              Venue                @relation(fields: [venueId], references: [id])
+  guestRsvps         Guest_RSVP[]
+  paymentsLedger     PaymentsLedger[]
+  vendors            Vendor[]
+}
+
+model Guest_RSVP {
+
+  name       String
+  email      String
+  phone      String 
+  eventId    String
+  rsvpStatus String @default("pending")
+  event      Event  @relation(fields: [eventId], references: [id])
+  
+  @@id(name:"guestId",[email, eventId])
+}
+
+model Users {
+  id                 String               @id @default(uuid())
+  username           String               @unique
+  email              String               @unique
+  password           String
+  phoneNumber        String               @unique
+  authenticationType String
+  role               String
+  channelParticipant ChannelParticipant[]
+  events             Event[]
+  paymentLedgers     PaymentsLedger[]
+}
+
+model Venue {
+  id        String  @id @default(uuid())
+  venueName String
+  location  String
+  capacity  Int
+  events    Event[]
+}
+
+model Vendor {
+  id             String           @id @default(uuid())
+  vendorId       String  @unique
+  eventId       String?           
+  vendorName     String
+  serviceType    String
+  contactInfo    String
+  event  Event[]
+  paymentsLedger PaymentsLedger[]
+}
+
+model Chat {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  message    String
+  timestamp  DateTime @default(now())
+  eventId    String
+  isDeleted  Boolean  @default(false)
+  isEdited   Boolean  @default(false)
+  event      Event    @relation(fields: [eventId], references: [id])
+}
+
+model PaymentsLedger {
+  id            String   @id @default(uuid())
+  paymentAmount Decimal
+  paymentDate   DateTime
+  dueDate       DateTime
+  payerId       String
+  payeeId       String
+  eventId       String
+  status        String
+  event         Event    @relation(fields: [eventId], references: [id])
+  payee         Vendor   @relation(fields: [payeeId], references: [id])
+  payer         Users    @relation(fields: [payerId], references: [id])
+}
+
+model Budget {
+  id              String  @id @default(uuid())
+  eventId         String  @unique
+  totalBudget     Decimal
+  allocatedBudget Decimal
+  remainingBudget Decimal
+  event           Event   @relation(fields: [eventId], references: [id])
+}
+
+model Channel {
+  id                 String               @id @default(uuid())
+  channelName        String
+  channelType        String
+  channelDescription String?
+  messages           ChannelMessage[]
+  eventId            String
+  participants       ChannelParticipant[]
+}
+
+model ChannelParticipant {
+  id            String  @id @default(uuid())
+  channelId     String
+  participantId String
+  eventId       String
+  role          String
+  isInviteAccepted Boolean @default(false)
+  channel       Channel @relation(fields: [channelId], references: [id])
+  event         Event   @relation(fields: [eventId], references: [id])
+  participant   Users   @relation(fields: [participantId], references: [username])
+}
+
+model ChannelMessage {
+  id        String   @id @default(uuid())
+  channelId String
+  senderId  String
+  message   String
+  timestamp DateTime @default(now())
+  isDeleted Boolean  @default(false)
+  isEdited  Boolean  @default(false)
+  channel   Channel  @relation(fields: [channelId], references: [id])
+}
+
+
+
