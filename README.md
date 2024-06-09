@@ -1,4 +1,5 @@
-# Festigo
+<h1 align="center">FESTIGO</h1>
+<h3 align="center">"Simplify your event planning journey!!!"</h3>
 ![msg1291183544-282343](https://github.com/RS-labhub/Festigo/assets/117426013/498e5a04-cd91-4d10-abbd-7c0d3e4ad439)
 
 
